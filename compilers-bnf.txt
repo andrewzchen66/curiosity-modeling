@@ -1,0 +1,58 @@
+<program> ::= <defns> <expr>
+
+<defns> ::=
+  | epsilon
+  | <defn> <defns>
+
+<defn> ::=
+  | FUNCTION ID LPAREN <params> EQ <expr>
+
+<params> ::=
+  | RPAREN
+  | ID <rest-params>
+
+<rest-params> ::=
+  | RPAREN
+  | COMMA ID <rest-params>
+
+<expr> ::=
+  | IF <expr> THEN <expr> ELSE <expr>
+  | LET ID EQ <expr> IN <expr>
+  | <seq>
+
+<seq> ::=
+  | <infix1> <rest-seq>
+
+<rest-seq> ::=
+  | epsilon
+  | SEMICOLON <infix1> <rest-seq>
+
+<infix1> ::=
+  | <infix2> <infix1'>
+
+<infix1'> ::=
+  | epsilon
+  | EQ <infix1>
+  | LT <infix1>
+
+<infix2> ::=
+  | <term> <infix2'>
+
+<infix2'> ::=
+  | epsilon
+  | PLUS <infix2>
+  | MINUS <infix2>
+
+<term> ::=
+  | ID
+  | ID LPAREN <args>
+  | NUM
+  | LPAREN <expr> RPAREN
+
+<args> ::=
+  | RPAREN
+  | <expr> <rest-args>
+
+<rest-args> ::=
+  | RPAREN
+  | COMMA <expr> <rest-args>
