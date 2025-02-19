@@ -47,7 +47,9 @@ sig Program {
 
 pred wellformed {
   some p: Program | {
-    
+    // FIXME: implement! mostly:
+    // 1. need to make sure no dangling SExprs, Operators, etc
+    // 2. no cycles in the program AST
   }
 }
 
