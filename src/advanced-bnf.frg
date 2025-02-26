@@ -158,7 +158,10 @@ sig Program {
 //   defn_expr: one BaseExp
 // }
 
+// ______________________________________________________________________
 // PREDS
+
+// Helper that checks every Exp field for whether expr2 is reachable from expr1
 pred expReachable[expr1, expr2: Exp] {
   reachable[
     expr1,
@@ -180,18 +183,24 @@ pred expReachable[expr1, expr2: Exp] {
   ]
 }
 
+// Program shouldn't have dangling Exp
+// All Exp should be reachable from root (Program)
 pred noDangling[program: Program] {
   all expr: Exp | program.program_expr != expr => {
     expReachable[expr, program.program_expr]
   }
 }
 
+// Exps shouldn't have cycles
+// if expr2 is reachable from expr1, then expr1 shouldn't be reachable from expr2
 pred noExpCycles {
   all disj expr1, expr2: Exp {
     expReachable[expr1, expr2] => not expReachable[expr2, expr1]
   }
 }
 
+// no DAGs in Program 
+// For every Exp, there should only be one parent that points to it
 pred noExpDAGs {
   all expr: Exp {
     add[
@@ -211,6 +220,8 @@ pred noExpDAGs {
   }
 }
 
+// Defines valid if exp
+// if_expr and else_expr should be distinct, and not point to the current expr
 pred validIfExp {
   all expr: IfExp {
     expr.if_expr != expr
@@ -219,6 +230,8 @@ pred validIfExp {
   }
 }
 
+// Defines valid let exp
+// bind_expr and body_expr should be distinct, and not point to the current expr
 pred validLetExp {
   all expr: LetExp {
     expr.bind_expr != expr
