@@ -136,59 +136,33 @@ sig Program {
 // }
 
 // PREDS
+pred expReachable[expr1, expr2: Exp] {
+  reachable[
+    expr1,
+    expr2,
+    // defn_expr,
+    if_expr,
+    else_expr,
+    infix1,
+    infix1_,
+    infix2,
+    infix2_,
+    eq_infix1,
+    plus_infix2,
+    // seq_list,
+    term
+  ]
+}
+
 pred noDangling[program: Program] {
   all expr: Exp | program.program_expr != expr => {
-    reachable[
-      expr,
-      program.program_expr,
-      // defn_expr,
-      if_expr,
-      else_expr,
-      infix1,
-      infix1_,
-      infix2,
-      infix2_,
-      eq_infix1,
-      plus_infix2,
-      // seq_list,
-      term
-    ]
+    expReachable[expr, program.program_expr]
   }
 }
 
 pred noExpCycles {
   all disj expr1, expr2: Exp {
-    reachable[
-      expr1,
-      expr2,
-      // defn_expr,
-      if_expr,
-      else_expr,
-      infix1,
-      infix1_,
-      infix2,
-      infix2_,
-      eq_infix1,
-      plus_infix2,
-      // seq_list,
-      term
-    ] => {
-      not reachable[
-        expr2,
-        expr1,
-        // defn_expr,
-        if_expr,
-        else_expr,
-        infix1,
-        infix1_,
-        infix2,
-        infix2_,
-        eq_infix1,
-        plus_infix2,
-        // seq_list,
-        term
-      ]
-    }
+    expReachable[expr1, expr2] => not expReachable[expr2, expr1]
   }
 }
 
