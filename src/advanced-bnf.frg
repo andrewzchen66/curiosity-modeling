@@ -184,9 +184,11 @@ pred expReachable[expr1, expr2: Exp] {
 
 // Program shouldn't have dangling Exp
 // All Exp should be reachable from root (Program)
-pred noDangling[program: Program] {
-  all expr: Exp | program.program_expr != expr => {
-    expReachable[expr, program.program_expr]
+pred noDangling {
+  all program: Program {
+    all expr: Exp | program.program_expr != expr => {
+      expReachable[expr, program.program_expr]
+    }
   }
 }
 

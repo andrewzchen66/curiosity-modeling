@@ -70,5 +70,69 @@ test suite for validIfExp {
 }
 
 test suite for validLetExp {
+  example validLetExp_good is {validLetExp} for {
+    BaseExp = `LetExp + `Exp1 + `Exp2
+    Exp = `LetExp + `Exp1 + `Exp2 + `Infix11 + `Infix12 + `Infix21 + `Infix22 + `Term1 + `Term2
 
+    LetExp = `LetExp
+    SeqExp = `Exp1 + `Exp2
+    Infix1 = `Infix11 + `Infix12
+    Infix2 = `Infix21 + `Infix22
+    Term = `Term1 + `Term2
+    `Term1.n = 1
+    `Term2.n = 2
+
+    `Infix11.infix2 = `Infix21
+    `Infix12.infix2 = `Infix22
+    `Infix21.term = `Term1
+    `Infix22.term = `Term2
+    `Exp1.infix1 = `Infix11
+    `Exp2.infix1 = `Infix12
+    `LetExp.bind_expr = `Exp1
+    `LetExp.body_expr = `Exp2
+  }
+
+  example validLetExp_bad_self_ref is {not validLetExp} for {
+    BaseExp = `LetExp + `Exp1 + `Exp2
+    Exp = `LetExp + `Exp1 + `Exp2 + `Infix11 + `Infix12 + `Infix21 + `Infix22 + `Term1 + `Term2
+
+    LetExp = `LetExp
+    SeqExp = `Exp1 + `Exp2
+    Infix1 = `Infix11 + `Infix12
+    Infix2 = `Infix21 + `Infix22
+    Term = `Term1 + `Term2
+    `Term1.n = 1
+    `Term2.n = 2
+
+    `Infix11.infix2 = `Infix21
+    `Infix12.infix2 = `Infix22
+    `Infix21.term = `Term1
+    `Infix22.term = `Term2
+    `Exp1.infix1 = `Infix11
+    `Exp2.infix1 = `Infix12
+    `LetExp.bind_expr = `LetExp
+    `LetExp.body_expr = `LetExp
+  }
+
+  example validLetExp_bad_shared_branch is {validLetExp} for {
+    BaseExp = `LetExp + `Exp1 + `Exp2
+    Exp = `LetExp + `Exp1 + `Exp2 + `Infix11 + `Infix12 + `Infix21 + `Infix22 + `Term1 + `Term2
+
+    LetExp = `LetExp
+    SeqExp = `Exp1 + `Exp2
+    Infix1 = `Infix11 + `Infix12
+    Infix2 = `Infix21 + `Infix22
+    Term = `Term1 + `Term2
+    `Term1.n = 1
+    `Term2.n = 2
+
+    `Infix11.infix2 = `Infix21
+    `Infix12.infix2 = `Infix22
+    `Infix21.term = `Term1
+    `Infix22.term = `Term2
+    `Exp1.infix1 = `Infix11
+    `Exp2.infix1 = `Infix12
+    `LetExp.bind_expr = `Exp1
+    `LetExp.body_expr = `Exp1
+  }
 }
