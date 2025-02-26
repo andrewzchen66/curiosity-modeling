@@ -85,10 +85,10 @@ sig PlusInfix2_ extends Infix2_ {
   plus: one PLUS,
   plus_infix2: one Infix2
 }
-sig MinusInfix2_ extends Infix2_ {
-  minus: one MINUS,
-  minus_infix2: one infix2
-}
+// sig MinusInfix2_ extends Infix2_ {
+//   minus: one MINUS,
+//   minus_infix2: one infix2
+// }
 
 // <term> ::=
 //   | ID
@@ -155,7 +155,7 @@ sig Program {
 //   defn_lparen: one LPAREN,
 //   // params: _,
 //   defn_eq: one EQ,
-//   defn_expr: one BaseExp
+//   defn_expr: one Exp
 // }
 
 // ______________________________________________________________________
@@ -177,7 +177,6 @@ pred expReachable[expr1, expr2: Exp] {
     infix2_,
     eq_infix1,
     plus_infix2,
-    minus_infix2,
     // seq_list,
     term
   ]
@@ -214,7 +213,6 @@ pred noExpDAGs {
       #{e: Exp | e.infix2_ = expr},
       #{e: Exp | e.eq_infix1 = expr},
       #{e: Exp | e.plus_infix2 = expr},
-      #{e: Exp | e.minus_infix2 = expr},
       #{e: Exp | e.term = expr}
     ] <= 1
   }
@@ -241,10 +239,7 @@ pred validLetExp {
 }
 
 run {
-  all program: Program {
-    noDangling[program]
-  }
-
+  noDangling
   noExpCycles
   noExpDAGs
   validIfExp
