@@ -13,20 +13,29 @@ sig LET {}
 sig PLUS {}
 sig MINUS {}
 
+// EVERYTHING IS AN EXP
+abstract sig Exp {}
+
 // <expr> ::=
 //   | IF <expr> THEN <expr> ELSE <expr>
 //   | LET ID EQ <expr> IN <expr>
 //   | <seq>
-abstract sig Exp {}
-sig IfExp extends Exp {
+abstract sig BaseExp extends Exp {}
+sig IfExp extends BaseExp {
   // if: one IF,
   // then: one THEN,
-  if_expr: one Exp,
+  if_expr: one BaseExp,
   // els: one ELSE,
-  else_expr: one Exp
+  else_expr: one BaseExp
 }
-// sig LetExp extends Exp {}
-sig SeqExp extends Exp {
+sig LetExp extends BaseExp {
+  // lt:
+  // id: 
+  // eq: one EQ,
+  bind_expr: one BaseExp,
+  body_expr: one BaseExp
+}
+sig SeqExp extends BaseExp {
   infix1: one Infix1
   // seq_list: one SeqList
 }
@@ -105,7 +114,7 @@ sig NumberTerm extends Term {
 // <program> ::= <defns> <expr>
 sig Program {
   // program_defns: one DefnList,
-  program_expr: one Exp
+  program_expr: one BaseExp
 }
 
 // <defns> ::=
@@ -143,6 +152,8 @@ pred expReachable[expr1, expr2: Exp] {
     // defn_expr,
     if_expr,
     else_expr,
+    bind_expr,
+    body_expr,
     infix1,
     infix1_,
     infix2,
@@ -171,6 +182,8 @@ pred noExpDAGs {
     add[
       #{e: Exp | e.if_expr = expr},
       #{e: Exp | e.else_expr = expr},
+      #{e: Exp | e.bind_expr = expr},
+      #{e: Exp | e.body_expr = expr},
       #{e: Exp | e.infix1 = expr},
       #{e: Exp | e.infix1_ = expr},
       #{e: Exp | e.infix2 = expr},
@@ -196,15 +209,9 @@ run {
     expr.if_expr != expr.else_expr
   }
 
-  // all disj expr1, expr2: IfExp, expr: Exp {
-  //   expr1.if_expr = expr => {
-  //     expr2.if_expr != expr
-  //     expr2.else_expr != expr
-  //   }
-  //   expr1.else_expr = expr => {
-  //     expr2.if_expr != expr
-  //     expr2.else_expr != expr
-  //   }
-  //   // reachable[expr, expr1, if_expr, else_expr] => not reachable[expr, expr2, if_expr, else_expr]
-  // }
-} for exactly 1 Program
+  all expr: LetExp {
+    expr.bind_expr != expr
+    expr.body_expr != expr
+    expr.bind_expr != expr.body_expr
+  }
+} for exactly 1 Program, 10 Exp
