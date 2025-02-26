@@ -114,7 +114,7 @@ test suite for validLetExp {
     `LetExp.body_expr = `LetExp
   }
 
-  example validLetExp_bad_shared_branch is {validLetExp} for {
+  example validLetExp_bad_shared_branch is {not validLetExp} for {
     BaseExp = `LetExp + `Exp1 + `Exp2
     Exp = `LetExp + `Exp1 + `Exp2 + `Infix11 + `Infix12 + `Infix21 + `Infix22 + `Term1 + `Term2
 
