@@ -1,19 +1,23 @@
 #lang forge/froglet
 
 // RESERVED KEYWORDS, SYMBOLS
-sig FUNCTION {}
 sig LPAREN {}
 sig RPAREN {}
+sig SEMICOLON {}
 sig COMMA {}
-sig EQ {}
-sig IF {}
-sig THEN {}
-sig ELSE {}
-sig LET {}
 sig PLUS {}
 sig MINUS {}
 
-// EVERYTHING IS AN EXP
+sig IF {}
+sig THEN {}
+sig ELSE {}
+
+sig ID {}
+sig LET {}
+sig EQ {}
+sig FUNCTION {}
+
+// EVERYTHING IS AN EXP - this is just a "node" in the S-Exp/AST tree
 abstract sig Exp {}
 
 // <expr> ::=
@@ -22,16 +26,16 @@ abstract sig Exp {}
 //   | <seq>
 abstract sig BaseExp extends Exp {}
 sig IfExp extends BaseExp {
-  // if: one IF,
-  // then: one THEN,
+  // __if__: one IF,
+  // __then__: one THEN,
+  // __else__: one ELSE,
   if_expr: one BaseExp,
-  // els: one ELSE,
   else_expr: one BaseExp
 }
 sig LetExp extends BaseExp {
-  // lt:
-  // id: 
-  // eq: one EQ,
+  // __let__: one LET,
+  // __id__: one ID,
+  // __eq__: one EQ,
   bind_expr: one BaseExp,
   body_expr: one BaseExp
 }
@@ -44,9 +48,11 @@ sig SeqExp extends BaseExp {
 // <rest-seq> ::=
 //   | epsilon
 //   | SEMICOLON <infix1> <rest-seq>
-abstract sig SeqList extends Exp {}
-sig EmptySeqList extends SeqList {}
-sig SomeSeqList extends SeqList {}
+// sig SeqList extends Exp {
+//   __semicolon__: one SEMICOLON,
+//   infix1: one Infix1,
+//   rest_seq: lone SeqList
+// }
 
 // <infix1> ::=
 //   | <infix2> <infix1'>
@@ -62,10 +68,9 @@ sig SomeSeqList extends SeqList {}
 //   | MINUS <infix2>
 sig Infix1 extends Exp {
   infix2: one Infix2,
-  infix1_: one Infix1_ 
+  infix1_: lone Infix1_ 
 }
 abstract sig Infix1_ extends Exp {}
-sig EmptyInfix1_ extends Infix1_ {}
 sig EqInfix1_ extends Infix1_ {
   // eq: one EQ,
   eq_infix1: one Infix1
@@ -73,18 +78,17 @@ sig EqInfix1_ extends Infix1_ {
 
 sig Infix2 extends Exp {
   term: one Term,
-  infix2_: one Infix2_
+  infix2_: lone Infix2_
 }
 abstract sig Infix2_ extends Exp {}
-sig EmptyInfix2_ extends Infix2_ {}
 sig PlusInfix2_ extends Infix2_ {
   plus: one PLUS,
   plus_infix2: one Infix2
 }
-// sig MinusInfix2_ extends Infix2_ {
-//   minus: one MINUS,
-//   minus_infix2: one infix2
-// }
+sig MinusInfix2_ extends Infix2_ {
+  minus: one MINUS,
+  minus_infix2: one infix2
+}
 
 // <term> ::=
 //   | ID
@@ -92,12 +96,12 @@ sig PlusInfix2_ extends Infix2_ {
 //   | NUM
 //   | LPAREN <expr> RPAREN
 abstract sig Term extends Exp {}
-// sig SymbolTerm extends Term {
-//   // s: one String
-// }
 sig NumberTerm extends Term {
   n: one Int
 }
+// sig SymbolTerm extends Term {
+//   // s: one String
+// }
 // sig FunctionCallTerm extends Term {
 // }
 // sig ParenTerm extends Term {
@@ -109,7 +113,17 @@ sig NumberTerm extends Term {
 // <rest-args> ::=
 //   | RPAREN
 //   | COMMA <expr> <rest-args>
-
+// sig Args extends Exp {
+//   rparen: one RPAREN,
+//   args_expr: one BaseExp,
+//   rest_args: one RestArgs
+// }
+// sig RestArgs extends Exp {
+//   rparen: one RPAREN,
+//   comma: one COMMA,
+//   rest_args_expr: one BaseExp,
+//   rest_args: one RestArgs
+// }
 
 // <program> ::= <defns> <expr>
 sig Program {
@@ -141,7 +155,7 @@ sig Program {
 //   defn_lparen: one LPAREN,
 //   // params: _,
 //   defn_eq: one EQ,
-//   defn_expr: one Exp
+//   defn_expr: one BaseExp
 // }
 
 // PREDS
@@ -160,6 +174,7 @@ pred expReachable[expr1, expr2: Exp] {
     infix2_,
     eq_infix1,
     plus_infix2,
+    minus_infix2,
     // seq_list,
     term
   ]
@@ -190,8 +205,25 @@ pred noExpDAGs {
       #{e: Exp | e.infix2_ = expr},
       #{e: Exp | e.eq_infix1 = expr},
       #{e: Exp | e.plus_infix2 = expr},
+      #{e: Exp | e.minus_infix2 = expr},
       #{e: Exp | e.term = expr}
     ] <= 1
+  }
+}
+
+pred validIfExp {
+  all expr: IfExp {
+    expr.if_expr != expr
+    expr.else_expr != expr
+    expr.if_expr != expr.else_expr
+  }
+}
+
+pred validLetExp {
+  all expr: LetExp {
+    expr.bind_expr != expr
+    expr.body_expr != expr
+    expr.bind_expr != expr.body_expr
   }
 }
 
@@ -202,16 +234,6 @@ run {
 
   noExpCycles
   noExpDAGs
-
-  all expr: IfExp {
-    expr.if_expr != expr
-    expr.else_expr != expr
-    expr.if_expr != expr.else_expr
-  }
-
-  all expr: LetExp {
-    expr.bind_expr != expr
-    expr.body_expr != expr
-    expr.bind_expr != expr.body_expr
-  }
-} for exactly 1 Program, 10 Exp
+  validIfExp
+  validLetExp
+} for exactly 1 Program, 16 Exp //, exactly 1 LetExp, exactly 1 IfExp
