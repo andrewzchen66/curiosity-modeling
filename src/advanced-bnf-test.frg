@@ -136,3 +136,55 @@ test suite for validLetExp {
     `LetExp.body_expr = `Exp1
   }
 }
+
+test suite for expReachable {
+  example validExpReachable is {{some expr1, expr2: Exp | expReachable[expr1, expr2]}} for {
+    BaseExp = `LetExp + `Exp1 + `Exp2
+    Exp = `LetExp + `Exp1 + `Exp2 + `Infix11 + `Infix12 + `Infix21 + `Infix22 + `Term1 + `Term2
+
+    LetExp = `LetExp
+    SeqExp = `Exp1 + `Exp2
+    Infix1 = `Infix11 + `Infix12
+    Infix2 = `Infix21 + `Infix22
+    Term = `Term1 + `Term2
+    `Term1.n = 1
+    `Term2.n = 2
+
+    `Infix11.infix2 = `Infix21
+    `Infix12.infix2 = `Infix22
+    `Infix21.term = `Term1
+    `Infix22.term = `Term2
+    `Exp1.infix1 = `Infix11
+    `Exp2.infix1 = `Infix12
+    `LetExp.bind_expr = `Exp1
+    `LetExp.body_expr = `Exp2
+  }
+
+  example validExpReachable2 is {{some expr1, expr2: Exp | expReachable[expr1, expr2]}} for {
+    BaseExp = `Exp1
+    Exp = `Exp1 + `Infix11 + `Infix21 + `Term1
+
+    SeqExp = `Exp1
+    Infix1 = `Infix11
+    Infix2 = `Infix21
+    Term = `Term1
+    `Term1.n = 1
+
+    `Infix11.infix2 = `Infix21
+    `Infix21.term = `Term1
+    `Exp1.infix1 = `Infix11
+  }
+
+  example invalidExpReachable is {{some expr1, expr2: Exp | not expReachable[expr1, expr2]}} for {
+    BaseExp = `LetExp + `Exp1 + `Exp2
+    Exp = `LetExp + `Exp1 + `Exp2 + `Infix11 + `Infix12 + `Infix21 + `Infix22 + `Term1 + `Term2
+
+    LetExp = `LetExp
+    SeqExp = `Exp1 + `Exp2
+    Infix1 = `Infix11 + `Infix12
+    Infix2 = `Infix21 + `Infix22
+    Term = `Term1 + `Term2
+    `Term1.n = 1
+    `Term2.n = 2
+  }
+}
