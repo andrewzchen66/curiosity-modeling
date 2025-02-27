@@ -30,6 +30,7 @@ sig IfExp extends BaseExp {
   // __then__: one THEN,
   // __else__: one ELSE,
   if_expr: one BaseExp,
+  then_expr: one BaseExp,
   else_expr: one BaseExp
 }
 sig LetExp extends BaseExp {
@@ -168,6 +169,7 @@ pred expReachable[expr1, expr2: Exp] {
     expr2,
     // defn_expr,
     if_expr,
+    then_expr,
     else_expr,
     bind_expr,
     body_expr,
@@ -206,6 +208,7 @@ pred noExpDAGs {
   all expr: Exp {
     add[
       #{e: Exp | e.if_expr = expr},
+      #{e: Exp | e.then_expr = expr},
       #{e: Exp | e.else_expr = expr},
       #{e: Exp | e.bind_expr = expr},
       #{e: Exp | e.body_expr = expr},
@@ -221,11 +224,13 @@ pred noExpDAGs {
 }
 
 // Defines valid if exp
-// if_expr and else_expr should be distinct, and not point to the current expr
+// if_expr, then_expr, else_expr should be distinct, and not point to the current expr
 pred validIfExp {
   all expr: IfExp {
     expr.if_expr != expr
+    expr.then_expr != expr
     expr.else_expr != expr
+    expr.if_expr != expr.then_expr
     expr.if_expr != expr.else_expr
   }
 }
