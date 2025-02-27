@@ -21,7 +21,8 @@ test suite for validIfExp {
     `Exp1.infix1 = `Infix11
     `Exp2.infix1 = `Infix12
     `IfExp.if_expr = `Exp1
-    `IfExp.else_expr = `Exp2
+    `IfExp.then_expr = `Exp2
+    // `IfExp.else_expr = `Exp3
   }
 
   example validIfExp_bad_self_ref is {not validIfExp} for {
@@ -43,6 +44,7 @@ test suite for validIfExp {
     `Exp1.infix1 = `Infix11
     `Exp2.infix1 = `Infix12
     `IfExp.if_expr = `IfExp
+    `IfExp.then_expr = `IfExp
     `IfExp.else_expr = `IfExp
   }
 
@@ -65,6 +67,7 @@ test suite for validIfExp {
     `Exp1.infix1 = `Infix11
     `Exp2.infix1 = `Infix12
     `IfExp.if_expr = `Exp1
+    `IfExp.then_expr = `Exp1
     `IfExp.else_expr = `Exp1
   }
 }
@@ -186,5 +189,56 @@ test suite for expReachable {
     Term = `Term1 + `Term2
     `Term1.n = 1
     `Term2.n = 2
+  }
+}
+
+test suite for noDangling {
+  example noDangling_true is {noDangling} for {
+    Program = `Program
+    Exp = `BaseExp
+    BaseExp = `BaseExp
+    `Program.program_expr = `BaseExp
+  }
+
+  example noDangling_false is {not noDangling} for {
+    Program = `Program
+    Exp = `BaseExp1 + `BaseExp2
+    BaseExp = `BaseExp1 + `BaseExp2
+    `Program.program_expr = `BaseExp1
+  }
+}
+
+test suite for noExpCycles {
+  example noExpCycles_true is {noExpCycles} for {
+    Exp = `LetExp + `IfExp + `SeqExp
+    BaseExp = `LetExp + `IfExp + `SeqExp
+    LetExp = `LetExp
+    `LetExp.bind_expr = `SeqExp
+    `IfExp.if_expr = `SeqExp
+  }
+
+  example noExpCycles_false is {not noExpCycles} for {
+    Exp = `LetExp + `IfExp
+    BaseExp = `LetExp + `IfExp
+    LetExp = `LetExp
+    IfExp = `IfExp
+    `LetExp.bind_expr = `IfExp
+    `IfExp.if_expr = `LetExp
+  }
+}
+
+test suite for noExpDAGs {
+  example noExpDAGs_true is {noExpDAGs} for {
+    Exp = `Term1 + `Term2
+    `Term1.n = 1
+    `Term2.n = 2
+  }
+
+  example noExpDAGs_false is {not noExpDAGs} for {
+    Exp = `LetExp + `IfExp + `SeqExp
+    BaseExp = `LetExp + `IfExp + `SeqExp
+    LetExp = `LetExp
+    `LetExp.bind_expr = `SeqExp
+    `IfExp.if_expr = `SeqExp
   }
 }
